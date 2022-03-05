@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Xu Desheng <xudesheng@gmail.com>"]
 license = "MIT"
-
+description = "A parser to extract javascript or sql code from the Thingworx XML export file."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow="1.0"
-
+clap = { version = "3.1", features = ["derive"] }
 quick-xml="0.22"
