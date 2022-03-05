@@ -12,3 +12,11 @@ description = "A parser to extract javascript or sql code from the Thingworx XML
 anyhow="1.0"
 clap = { version = "3.1", features = ["derive"] }
 quick-xml="0.22"
+
+
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+opt-level = "z"  # Optimize for size.
+lto = true
+codegen-units = 1
+panic = "abort"
