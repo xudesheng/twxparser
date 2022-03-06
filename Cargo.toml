@@ -1,6 +1,6 @@
 [package]
 name = "twxparser"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Xu Desheng <xudesheng@gmail.com>"]
 license = "MIT"
@@ -13,6 +13,9 @@ anyhow="1.0"
 clap = { version = "3.1", features = ["derive"] }
 quick-xml="0.22"
 
+[[bin]]
+name = "twxparser"
+path = "src/main.rs"
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
