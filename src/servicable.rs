@@ -1,19 +1,32 @@
 use std::path::PathBuf;
 
 use crate::{
-    shape::ThingShape,
     si::{Service, ServiceHandler},
     sub::Subscription,
-    template::ThingTemplate,
-    thing::Thing,
 };
 use anyhow::Result;
 pub trait Servicable {
     fn need_export(&self) -> bool {
         self.get_valid_service_count() > 0 || self.get_valid_subscription_count() > 0
     }
-    fn get_valid_service_count(&self) -> usize;
-    fn get_valid_subscription_count(&self) -> usize;
+    fn get_valid_service_count(&self) -> usize {
+        let mut count = 0;
+        for service in self.get_services() {
+            if service.service_type != ServiceHandler::Reflection {
+                count += 1;
+            }
+        }
+        count
+    }
+    fn get_valid_subscription_count(&self) -> usize {
+        let mut count = 0;
+        for subscription in self.get_subscriptions() {
+            if subscription.name != "" {
+                count += 1;
+            }
+        }
+        count
+    }
     fn get_charactor_str(&self) -> &'static str;
     fn get_name(&self) -> &str;
     fn get_services(&self) -> &Vec<Service>;
@@ -43,11 +56,14 @@ pub trait Servicable {
         Ok(path)
     }
 
-    fn export_services(&self, root: &str) -> Result<()> {
+    // entity, services, subscriptions exported.
+    fn export_services(&self, root: &str) -> Result<(u32, u32, u32)> {
         if !self.need_export() {
             self.clean_folder(root)?;
-            return Ok(());
+            return Ok((0, 0, 0));
         }
+        let mut service_count = 0;
+        let mut subscription_count = 0;
         let path = self.build_entity_folder(root)?;
 
         if self.get_valid_subscription_count() > 0 {
@@ -82,6 +98,7 @@ pub trait Servicable {
                     }
                 }
                 subscription.export_to_file(&service_path)?;
+                subscription_count += 1;
             }
         }
         if self.get_valid_service_count() > 0 {
@@ -116,108 +133,10 @@ pub trait Servicable {
                     }
                 }
                 service.export_to_file(&service_path)?;
+                service_count += 1;
             }
         }
 
-        Ok(())
-    }
-}
-
-impl Servicable for Thing {
-    fn get_services(&self) -> &Vec<Service> {
-        &self.services
-    }
-    fn get_subscriptions(&self) -> &Vec<Subscription> {
-        &self.subscriptions
-    }
-    fn get_name(&self) -> &str {
-        &self.name
-    }
-    fn get_valid_service_count(&self) -> usize {
-        let mut count = 0;
-        for service in &self.services {
-            if service.service_type != ServiceHandler::Reflection {
-                count += 1;
-            }
-        }
-        count
-    }
-    fn get_valid_subscription_count(&self) -> usize {
-        let mut count = 0;
-        for subscription in &self.subscriptions {
-            if subscription.name != "" {
-                count += 1;
-            }
-        }
-        count
-    }
-    fn get_charactor_str(&self) -> &'static str {
-        "Things"
-    }
-}
-
-impl Servicable for ThingShape {
-    fn get_services(&self) -> &Vec<Service> {
-        &self.services
-    }
-    fn get_subscriptions(&self) -> &Vec<Subscription> {
-        &self.subscriptions
-    }
-    fn get_name(&self) -> &str {
-        &self.name
-    }
-    fn get_valid_service_count(&self) -> usize {
-        let mut count = 0;
-        for service in &self.services {
-            if service.service_type != ServiceHandler::Reflection {
-                count += 1;
-            }
-        }
-        count
-    }
-    fn get_valid_subscription_count(&self) -> usize {
-        let mut count = 0;
-        for subscription in &self.subscriptions {
-            if subscription.name != "" {
-                count += 1;
-            }
-        }
-        count
-    }
-    fn get_charactor_str(&self) -> &'static str {
-        "ThingShapes"
-    }
-}
-
-impl Servicable for ThingTemplate {
-    fn get_services(&self) -> &Vec<Service> {
-        &self.services
-    }
-    fn get_subscriptions(&self) -> &Vec<Subscription> {
-        &self.subscriptions
-    }
-    fn get_name(&self) -> &str {
-        &self.name
-    }
-    fn get_valid_service_count(&self) -> usize {
-        let mut count = 0;
-        for service in &self.services {
-            if service.service_type != ServiceHandler::Reflection {
-                count += 1;
-            }
-        }
-        count
-    }
-    fn get_valid_subscription_count(&self) -> usize {
-        let mut count = 0;
-        for subscription in &self.subscriptions {
-            if subscription.name != "" {
-                count += 1;
-            }
-        }
-        count
-    }
-    fn get_charactor_str(&self) -> &'static str {
-        "ThingTemplates"
+        Ok((1, service_count, subscription_count))
     }
 }

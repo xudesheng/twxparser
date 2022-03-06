@@ -24,13 +24,31 @@ use crate::thing::Thing;
 // sc: Subscription
 // scs: Subscriptions
 // pds: ParameterDefinitions
-pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<(u32, u32, u32)> {
+pub fn parse(
+    reader: BufReader<File>,
+    export_root: &str,
+) -> Result<(
+    u32, // total things
+    u32, // total thing templates
+    u32, // total thing shapes
+    u32, // exported things
+    u32, // exported thing templates
+    u32, // exported thing shapes
+    u32, // exported services
+    u32, // exported subscriptions
+)> {
     let mut reader = Reader::from_reader(reader);
 
     let mut buf = Vec::new();
     let mut thing_count = 0;
     let mut thing_template_count = 0;
     let mut thing_shape_count = 0;
+
+    let mut exported_things = 0;
+    let mut exported_thing_templates = 0;
+    let mut exported_thing_shapes = 0;
+    let mut exported_services = 0;
+    let mut exported_subscriptions = 0;
 
     let mut found_thing = false;
     let mut found_template = false;
@@ -350,20 +368,32 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<(u32, u32, u3
                     }
                     if !(found_thing || found_template) {
                         thing_shape_count += 1;
-                        thing_shape.export_services(export_root)?;
+                        let (entity_count, svc_count, sub_count) =
+                            thing_shape.export_services(export_root)?;
+                        exported_thing_shapes += entity_count;
+                        exported_services += svc_count;
+                        exported_subscriptions += sub_count;
                         thing_shape = ThingShape::default();
                     }
                 }
                 if e.name() == b"Thing" {
                     found_thing = false;
-                    thing.export_services(export_root)?;
+                    let (entity_count, svc_count, sub_count) =
+                        thing.export_services(export_root)?;
+                    exported_things += entity_count;
+                    exported_services += svc_count;
+                    exported_subscriptions += sub_count;
                     // things.push(thing);
                     thing = Thing::default();
                 }
 
                 if e.name() == b"ThingTemplate" {
                     found_template = false;
-                    thing_template.export_services(export_root)?;
+                    let (entity_count, svc_count, sub_count) =
+                        thing_template.export_services(export_root)?;
+                    exported_thing_templates += entity_count;
+                    exported_services += svc_count;
+                    exported_subscriptions += sub_count;
                     // thing_templates.push(thing_template);
                     thing_template = ThingTemplate::default();
                 }
@@ -437,5 +467,14 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<(u32, u32, u3
             _ => (),
         }
     }
-    Ok((thing_count, thing_template_count, thing_shape_count))
+    Ok((
+        thing_count,
+        thing_template_count,
+        thing_shape_count,
+        exported_things,
+        exported_thing_templates,
+        exported_thing_shapes,
+        exported_services,
+        exported_subscriptions,
+    ))
 }
