@@ -1,10 +1,10 @@
 use anyhow::Result;
-use std::fmt;
 use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
-use std::path::PathBuf;
+
 use std::str::FromStr;
+use std::{fmt, path::Path};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ServiceHandler {
@@ -74,29 +74,38 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn export_to_file(&self, path: &PathBuf) -> Result<()> {
+    pub fn export_to_file(&self, path: &Path, leading_prefix: &str) -> Result<()> {
         let file = File::create(path)?;
         let mut writer = BufWriter::new(file);
 
-        write!(writer, "//{:>20}:\t{}\n", "name", self.name)?;
-        write!(writer, "//{:>20}:\t{}\n", "service_type", self.service_type)?;
-        write!(
+        writeln!(writer, "{}{:>20}:\t{}", leading_prefix, "name", self.name)?;
+        writeln!(
             writer,
-            "//{:>20}:\t{}\n",
+            "{}{:>20}:\t{}",
+            leading_prefix, "service_type", self.service_type
+        )?;
+        writeln!(
+            writer,
+            "{}{:>20}:\t{}",
+            leading_prefix,
             "parameters",
             self.parameters.len()
         )?;
         for parameter in self.parameters.iter() {
-            write!(
+            writeln!(
                 writer,
-                "//\t\t\t\t{:<20}:\t{}\n",
-                parameter.name, parameter.base_type
+                "{}\t\t\t\t{:<20}:\t{}",
+                leading_prefix, parameter.name, parameter.base_type
             )?;
         }
 
-        write!(writer, "{}\n", &self.code)?;
+        writeln!(writer, "{}", &self.code)?;
         if let Some(ref result) = self.result {
-            write!(writer, "//{:>20}:\t{}", result.name, result.base_type)?;
+            write!(
+                writer,
+                "{}{:>20}:\t{}",
+                leading_prefix, result.name, result.base_type
+            )?;
         }
 
         Ok(())

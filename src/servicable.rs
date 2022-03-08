@@ -21,7 +21,7 @@ pub trait Servicable {
     fn get_valid_subscription_count(&self) -> usize {
         let mut count = 0;
         for subscription in self.get_subscriptions() {
-            if subscription.name != "" {
+            if !subscription.name.is_empty() {
                 count += 1;
             }
         }
@@ -80,29 +80,34 @@ pub trait Servicable {
                 }
                 let mut service_path = path.clone();
                 service_path.push(&subscription.name);
-                match subscription.service_type {
+                let leading_prefix = match subscription.service_type {
                     ServiceHandler::Scrit => {
                         service_path.set_extension("js");
+                        "// "
                     }
                     ServiceHandler::SQLQuery => {
                         service_path.set_extension("sql");
+                        "-- "
                     }
                     ServiceHandler::SQLCommand => {
                         service_path.set_extension("sql");
+                        "-- "
                     }
                     ServiceHandler::Route => {
                         service_path.set_extension("json");
+                        "// "
                     }
                     ServiceHandler::Reflection => {
                         service_path.set_extension("Reflection");
+                        "// "
                     }
-                }
-                subscription.export_to_file(&service_path)?;
+                };
+                subscription.export_to_file(&service_path, leading_prefix)?;
                 subscription_count += 1;
             }
         }
         if self.get_valid_service_count() > 0 {
-            let mut path = path.clone();
+            let mut path = path;
             path.push("services");
             if path.exists() && path.is_dir() {
                 std::fs::remove_dir_all(&path)?;
@@ -115,24 +120,29 @@ pub trait Servicable {
                 }
                 let mut service_path = path.clone();
                 service_path.push(&service.name);
-                match service.service_type {
+                let leading_prefix = match service.service_type {
                     ServiceHandler::Scrit => {
                         service_path.set_extension("js");
+                        "// "
                     }
                     ServiceHandler::SQLQuery => {
                         service_path.set_extension("sql");
+                        "-- "
                     }
                     ServiceHandler::SQLCommand => {
                         service_path.set_extension("sql");
+                        "-- "
                     }
                     ServiceHandler::Route => {
                         service_path.set_extension("json");
+                        "// "
                     }
                     ServiceHandler::Reflection => {
                         service_path.set_extension("Reflection");
+                        "// "
                     }
-                }
-                service.export_to_file(&service_path)?;
+                };
+                service.export_to_file(&service_path, leading_prefix)?;
                 service_count += 1;
             }
         }

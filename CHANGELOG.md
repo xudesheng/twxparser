@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.1.4] v0.1.4 (2022-03-08)
+
+### Changed
+- [X] changed the leading comment string for sql script to '--'
+
 ## [v0.1.3] v0.1.3 (2022-03-08)
 
 ### Fixed

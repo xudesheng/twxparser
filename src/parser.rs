@@ -24,10 +24,7 @@ use crate::thing::Thing;
 // sc: Subscription
 // scs: Subscriptions
 // pds: ParameterDefinitions
-pub fn parse(
-    reader: BufReader<File>,
-    export_root: &str,
-) -> Result<(
+type ParserCounters = (
     u32, // total things
     u32, // total thing templates
     u32, // total thing shapes
@@ -36,7 +33,8 @@ pub fn parse(
     u32, // exported thing shapes
     u32, // exported services
     u32, // exported subscriptions
-)> {
+);
+pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounters> {
     let mut reader = Reader::from_reader(reader);
 
     let mut buf = Vec::new();
@@ -113,14 +111,10 @@ pub fn parse(
                     in_ts_scs_sc_si = true;
                     for attr in e.attributes() {
                         let attr = attr?;
-                        match attr.key {
-                            b"handlerName" => {
-                                subscription.service_type = ServiceHandler::from_str(
-                                    &attr.unescape_and_decode_value(&reader)?,
-                                )
-                                .unwrap();
-                            }
-                            _ => {}
+                        if let b"handlerName" = attr.key {
+                            subscription.service_type =
+                                ServiceHandler::from_str(&attr.unescape_and_decode_value(&reader)?)
+                                    .unwrap();
                         }
                     }
                 }
@@ -163,12 +157,8 @@ pub fn parse(
                     in_ts_sds_sd = true;
                     for attr in e.attributes() {
                         let attr = attr?;
-                        match attr.key {
-                            b"name" => {
-                                service_definition.name =
-                                    attr.unescape_and_decode_value(&reader)?;
-                            }
-                            _ => {}
+                        if let b"name" = attr.key {
+                            service_definition.name = attr.unescape_and_decode_value(&reader)?;
                         }
                     }
                 }
@@ -225,12 +215,8 @@ pub fn parse(
                     if !(found_thing || found_template) {
                         for attr in e.attributes() {
                             let attr = attr?;
-                            match attr.key {
-                                b"name" => {
-                                    thing_shape.name = attr.unescape_and_decode_value(&reader)?;
-                                }
-
-                                _ => {}
+                            if let b"name" = attr.key {
+                                thing_shape.name = attr.unescape_and_decode_value(&reader)?;
                             }
                         }
                         // println!("processing shape:{}", thing_shape.name);
@@ -294,7 +280,7 @@ pub fn parse(
                 }
                 if in_ts_scs && e.name() == b"Subscription" {
                     in_ts_scs_sc = false;
-                    if subscription.name != "" {
+                    if !subscription.name.is_empty() {
                         if found_thing {
                             thing.subscriptions.push(subscription);
                         } else if found_template {
@@ -353,26 +339,25 @@ pub fn parse(
                 if e.name() == b"ThingShape" {
                     in_ts = false;
                     for (k, v) in service_implementation_map.drain() {
-                        match service_definition_map.get(&k) {
-                            Some(sd) => {
-                                let mut service = Service::default();
-                                service.name = k;
-                                service.service_type = v.service_type;
-                                service.code = v.code;
-                                service.parameters = sd.parameters.clone();
-                                service.result = sd.result.clone();
-                                if found_thing {
-                                    thing.services.push(service);
-                                } else if found_template {
-                                    // println!("push service:{} to template:{}",service.name,thing_template.name);
-                                    thing_template.services.push(service);
-                                } else {
-                                    // println!("push service:{} to shape:{}",service.name,thing_shape.name);
-                                    thing_shape.services.push(service);
-                                }
-                                // thing.services.push(service);
+                        if let Some(sd) = service_definition_map.get(&k) {
+                            let service = Service {
+                                name: k,
+                                service_type: v.service_type,
+                                code: v.code,
+                                parameters: sd.parameters.clone(),
+                                result: sd.result.clone(),
+                            };
+
+                            if found_thing {
+                                thing.services.push(service);
+                            } else if found_template {
+                                // println!("push service:{} to template:{}",service.name,thing_template.name);
+                                thing_template.services.push(service);
+                            } else {
+                                // println!("push service:{} to shape:{}",service.name,thing_shape.name);
+                                thing_shape.services.push(service);
                             }
-                            None => {}
+                            // thing.services.push(service);
                         }
                     }
                     if !(found_thing || found_template) {

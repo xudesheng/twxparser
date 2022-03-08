@@ -1,6 +1,6 @@
 use crate::si::*;
 use anyhow::Result;
-use std::{fs::File, io::BufWriter, io::Write, path::PathBuf};
+use std::{fs::File, io::BufWriter, io::Write, path::Path};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Subscription {
@@ -15,20 +15,40 @@ pub struct Subscription {
 }
 
 impl Subscription {
-    pub fn export_to_file(&self, path: &PathBuf) -> Result<()> {
+    pub fn export_to_file(&self, path: &Path, leading_prefix: &str) -> Result<()> {
         let file = File::create(path)?;
         let mut writer = BufWriter::new(file);
-        write!(writer, "//{:>20}:\t{}\n", "name", self.name)?;
-        write!(writer, "//{:>20}:\t{}\n", "enabled", self.enabled)?;
-        write!(writer, "//{:>20}:\t{}\n", "source", self.source)?;
-        write!(writer, "//{:>20}:\t{}\n", "event_name", self.event_name)?;
-        write!(
+        writeln!(writer, "{}{:>20}:\t{}", leading_prefix, "name", self.name)?;
+        writeln!(
             writer,
-            "//{:>20}:\t{}\n",
-            "source_property", self.source_property
+            "{}{:>20}:\t{}",
+            leading_prefix, "enabled", self.enabled
         )?;
-        write!(writer, "//{:>20}:\t{}\n", "source_type", self.source_type)?;
-        write!(writer, "//{:>20}:\t{}\n", "service_type", self.service_type)?;
+        writeln!(
+            writer,
+            "{}{:>20}:\t{}",
+            leading_prefix, "source", self.source
+        )?;
+        writeln!(
+            writer,
+            "{}{:>20}:\t{}",
+            leading_prefix, "event_name", self.event_name
+        )?;
+        writeln!(
+            writer,
+            "{}{:>20}:\t{}",
+            leading_prefix, "source_property", self.source_property
+        )?;
+        writeln!(
+            writer,
+            "{}{:>20}:\t{}",
+            leading_prefix, "source_type", self.source_type
+        )?;
+        writeln!(
+            writer,
+            "{}{:>20}:\t{}",
+            leading_prefix, "service_type", self.service_type
+        )?;
         write!(writer, "{}", &self.code)?;
         Ok(())
     }
