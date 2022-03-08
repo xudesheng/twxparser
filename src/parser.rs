@@ -67,6 +67,8 @@ pub fn parse(
     let mut in_ts_sis_si_cts_ct_rows = false;
     let mut in_ts_sis_si_cts_ct_rows_row = false;
     let mut in_ts_sis_si_cts_ct_rows_row_code = false;
+    // for sql query and sql command
+    let mut in_ts_sis_si_cts_ct_rows_row_sql = false;
 
     // subscriptions parsed from Thing block
     let mut in_ts_scs = false;
@@ -174,6 +176,10 @@ pub fn parse(
                 if in_ts && e.name() == b"ServiceDefinitions" {
                     in_ts_sds = true;
                 }
+                if in_ts_sis_si_cts_ct_rows_row && e.name() == b"sql" {
+                    in_ts_sis_si_cts_ct_rows_row_sql = true;
+                }
+
                 if in_ts_sis_si_cts_ct_rows_row && e.name() == b"code" {
                     in_ts_sis_si_cts_ct_rows_row_code = true;
                 }
@@ -303,6 +309,9 @@ pub fn parse(
                     in_ts_scs = false;
                 }
 
+                if in_ts_sis_si_cts_ct_rows_row && e.name() == b"sql" {
+                    in_ts_sis_si_cts_ct_rows_row_sql = false;
+                }
                 if in_ts_sis_si_cts_ct_rows_row && e.name() == b"code" {
                     in_ts_sis_si_cts_ct_rows_row_code = false;
                 }
@@ -404,6 +413,12 @@ pub fn parse(
                     let code = e.unescape_and_decode(&reader)?;
                     service_implementation.code = code;
                     // println!("{}", code);
+                }
+                // this block can be merged with the above block. Keep it for logic simplicity.
+                if in_ts_sis_si_cts_ct_rows_row_sql {
+                    let sql = e.unescape_and_decode(&reader)?;
+                    // println!("{}", sql);
+                    service_implementation.code = sql;
                 }
                 if in_ts_scs_sc_si_cts_ct_rows_row_code {
                     let code = e.unescape_and_decode(&reader)?;
