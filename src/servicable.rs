@@ -12,7 +12,9 @@ pub trait Servicable {
     fn get_valid_service_count(&self) -> usize {
         let mut count = 0;
         for service in self.get_services() {
-            if service.service_type != ServiceHandler::Reflection {
+            if service.service_type != ServiceHandler::Reflection
+                && service.service_type != ServiceHandler::Route
+            {
                 count += 1;
             }
         }
@@ -21,7 +23,10 @@ pub trait Servicable {
     fn get_valid_subscription_count(&self) -> usize {
         let mut count = 0;
         for subscription in self.get_subscriptions() {
-            if !subscription.name.is_empty() {
+            if !subscription.name.is_empty()
+                && (subscription.service_type != ServiceHandler::Reflection
+                    && subscription.service_type != ServiceHandler::Route)
+            {
                 count += 1;
             }
         }
@@ -75,7 +80,10 @@ pub trait Servicable {
             std::fs::create_dir_all(&path)?;
 
             for subscription in self.get_subscriptions() {
-                if subscription.service_type == ServiceHandler::Reflection {
+                if subscription.service_type == ServiceHandler::Reflection
+                    || subscription.service_type == ServiceHandler::Route
+                    || subscription.name.is_empty()
+                {
                     continue;
                 }
                 let mut service_path = path.clone();
@@ -115,7 +123,9 @@ pub trait Servicable {
             std::fs::create_dir_all(&path)?;
 
             for service in self.get_services() {
-                if service.service_type == ServiceHandler::Reflection {
+                if service.service_type == ServiceHandler::Reflection
+                    || service.service_type == ServiceHandler::Route
+                {
                     continue;
                 }
                 let mut service_path = path.clone();

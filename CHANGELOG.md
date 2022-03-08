@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v0.1.5] v0.1.5 (2022-03-08)
+
+### Changed
+
+- [X] Don't export `Route` (json) and `Reflection` type services.
+
 ## [v0.1.4] v0.1.4 (2022-03-08)
 
 ### Changed
