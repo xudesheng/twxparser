@@ -1,6 +1,6 @@
-use crate::servicable::Servicable;
 use crate::si::*;
 use crate::sub::*;
+use crate::{bindings::RemotePropertyBinding, servicable::Servicable};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Thing {
@@ -8,6 +8,7 @@ pub struct Thing {
     pub template: String,
     pub services: Vec<Service>,
     pub subscriptions: Vec<Subscription>,
+    pub property_bindings: Vec<RemotePropertyBinding>,
 }
 
 impl Servicable for Thing {
@@ -23,5 +24,9 @@ impl Servicable for Thing {
 
     fn get_charactor_str(&self) -> &'static str {
         "Things"
+    }
+
+    fn get_property_bindings(&self) -> &Vec<RemotePropertyBinding> {
+        &self.property_bindings
     }
 }

@@ -1,14 +1,19 @@
 use std::path::PathBuf;
 
 use crate::{
+    bindings::RemotePropertyBinding,
     si::{Service, ServiceHandler},
     sub::Subscription,
 };
 use anyhow::Result;
+use csv::WriterBuilder;
 pub trait Servicable {
     fn need_export(&self) -> bool {
         self.get_valid_service_count() > 0 || self.get_valid_subscription_count() > 0
     }
+
+    fn get_property_bindings(&self) -> &Vec<RemotePropertyBinding>;
+
     fn get_valid_service_count(&self) -> usize {
         let mut count = 0;
         for service in self.get_services() {
@@ -61,8 +66,29 @@ pub trait Servicable {
         Ok(path)
     }
 
+    fn export_remote_property_bindings(&self, root: &str) -> Result<()> {
+        let bindings = self.get_property_bindings();
+        if bindings.is_empty() {
+            return Ok(());
+        }
+
+        let csvpath = crate::bindings::get_bindings_csvfile(root)?;
+        let csvfile = std::fs::OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open(&csvpath)?;
+        let mut writer = WriterBuilder::new().has_headers(false).from_writer(csvfile);
+        for binding in bindings.iter() {
+            writer.serialize(binding)?;
+        }
+        writer.flush()?;
+        // println!("name:{},bindings:{}", self.get_name(), bindings.len());
+        Ok(())
+    }
     // entity, services, subscriptions exported.
     fn export_services(&self, root: &str) -> Result<(u32, u32, u32)> {
+        self.export_remote_property_bindings(root)?;
+
         if !self.need_export() {
             self.clean_folder(root)?;
             return Ok((0, 0, 0));

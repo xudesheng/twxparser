@@ -8,12 +8,12 @@ use std::fs::File;
 use std::io::BufReader;
 use std::str::FromStr;
 
-use crate::servicable::*;
 use crate::shape::ThingShape;
 use crate::si::{self, *};
 use crate::sub::Subscription;
 use crate::template::ThingTemplate;
 use crate::thing::Thing;
+use crate::{bindings::RemotePropertyBinding, servicable::*};
 // ts: ThingShape
 // sis: ServiceImplementations
 // si: ServiceImplementation
@@ -50,6 +50,8 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
 
     let mut found_thing = false;
     let mut found_template = false;
+
+    let mut is_remote_property_bindings = false; // remote property bindings.
 
     // service definitions parsed from ThingShape block
     let mut in_ts = false;
@@ -222,6 +224,87 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                         // println!("processing shape:{}", thing_shape.name);
                     }
                 }
+
+                if is_remote_property_bindings && e.name() == b"RemotePropertyBinding" {
+                    let mut remote_property_binding = RemotePropertyBinding::default();
+
+                    for attr in e.attributes() {
+                        let attr = attr?;
+                        match attr.key {
+                            b"aspect.dataShape" => {
+                                remote_property_binding.data_shape =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.industrialDataType" => {
+                                remote_property_binding.industrial_data_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.scanRate" => {
+                                remote_property_binding.scan_rate =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.startType" => {
+                                remote_property_binding.start_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.tagAddress" => {
+                                remote_property_binding.tag_address =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.tagType" => {
+                                remote_property_binding.tag_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"foldType" => {
+                                remote_property_binding.fold_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"name" => {
+                                remote_property_binding.property_name =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"pushType" => {
+                                remote_property_binding.push_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"sourceName" => {
+                                remote_property_binding.source_name =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"timeout" => {
+                                remote_property_binding.timeout =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            _ => {}
+                        }
+                    }
+                    // println!(
+                    //     "found_thing:{},found_template:{}, in_ts:{}, rpbs:{:?}",
+                    //     found_thing, found_template, in_ts, remote_property_binding
+                    // );
+                    if found_thing {
+                        remote_property_binding.entity_type = "Thing".to_string();
+                        remote_property_binding.entity_name = thing.name.clone();
+                        // println!(
+                        //     "found_thing:{},found_template:{}, in_ts:{}, rpbs:{:?},thing.property_binds:{}",
+                        //     found_thing, found_template, in_ts, remote_property_binding,thing.property_bindings.len()
+                        // );
+                        thing.property_bindings.push(remote_property_binding);
+                    } else if found_template {
+                        remote_property_binding.entity_type = "ThingTemplate".to_string();
+                        remote_property_binding.entity_name = thing_template.name.clone();
+                        thing_template
+                            .property_bindings
+                            .push(remote_property_binding);
+                    } else if in_ts {
+                        remote_property_binding.entity_type = "ThingShape".to_string();
+                        remote_property_binding.entity_name = thing_shape.name.clone();
+                        thing_shape.property_bindings.push(remote_property_binding);
+                    }
+                }
+                if e.name() == b"RemotePropertyBindings" {
+                    is_remote_property_bindings = true;
+                }
                 if e.name() == b"Thing" {
                     thing_count += 1;
                     found_thing = true;
@@ -369,6 +452,9 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                         exported_subscriptions += sub_count;
                         thing_shape = ThingShape::default();
                     }
+                }
+                if e.name() == b"RemotePropertyBindings" {
+                    is_remote_property_bindings = false;
                 }
                 if e.name() == b"Thing" {
                     found_thing = false;

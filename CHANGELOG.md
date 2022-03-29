@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+## [v0.2.0] v0.2.0 (2022-03-28)
+
+### Changed
+
+- [X] Support to export remote property bindings to the <export_root>/remote_property_bindings.csv file.
 
 ## [v0.1.5] v0.1.5 (2022-03-08)
 

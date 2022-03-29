@@ -12,6 +12,8 @@ description = "A parser to extract javascript or sql code from the Thingworx XML
 anyhow="1.0"
 clap = { version = "3.1", features = ["derive"] }
 quick-xml="0.22"
+csv = "1.1"
+serde = { version = "1.0", features = ["derive"] }
 
 [[bin]]
 name = "twxparser"
