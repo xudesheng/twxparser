@@ -442,7 +442,16 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                     if !(found_thing || found_template) {
                         thing_shape_count += 1;
                         let (entity_count, svc_count, sub_count) =
-                            thing_shape.export_services(export_root)?;
+                            match thing_shape.export_services(export_root) {
+                                Ok(v) => v,
+                                Err(e) => {
+                                    println!(
+                                        "export_services error:{},thing_shape.name:{}",
+                                        e, thing_shape.name
+                                    );
+                                    continue;
+                                }
+                            };
                         exported_thing_shapes += entity_count;
                         exported_services += svc_count;
                         exported_subscriptions += sub_count;
@@ -455,7 +464,13 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                 if e.name() == b"Thing" {
                     found_thing = false;
                     let (entity_count, svc_count, sub_count) =
-                        thing.export_services(export_root)?;
+                        match thing.export_services(export_root) {
+                            Ok(v) => v,
+                            Err(e) => {
+                                println!("export_services error:{},thing.name:{}", e, thing.name);
+                                continue;
+                            }
+                        };
                     exported_things += entity_count;
                     exported_services += svc_count;
                     exported_subscriptions += sub_count;
@@ -466,7 +481,16 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                 if e.name() == b"ThingTemplate" {
                     found_template = false;
                     let (entity_count, svc_count, sub_count) =
-                        thing_template.export_services(export_root)?;
+                        match thing_template.export_services(export_root) {
+                            Ok(v) => v,
+                            Err(e) => {
+                                println!(
+                                    "export_services error:{},thing_template.name:{}",
+                                    e, thing_template.name
+                                );
+                                continue;
+                            }
+                        };
                     exported_thing_templates += entity_count;
                     exported_services += svc_count;
                     exported_subscriptions += sub_count;
