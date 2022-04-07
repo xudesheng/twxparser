@@ -1,6 +1,12 @@
 # Changelog
 
 ## [Unreleased]
+## [v0.2.1] v0.2.1 (2022-04-07)
+
+### Changed
+- Fixed a bug the export will stop when the RemotePropertyBindings is empty.
+- Fixed a bug on Windows that the letter ':' caused an error.
+
 ## [v0.2.0] v0.2.0 (2022-03-28)
 
 ### Changed
