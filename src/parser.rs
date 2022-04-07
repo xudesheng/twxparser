@@ -226,6 +226,7 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                 }
 
                 if is_remote_property_bindings && e.name() == b"RemotePropertyBinding" {
+                    // println!("found remote property binding");
                     let mut remote_property_binding = RemotePropertyBinding::default();
 
                     for attr in e.attributes() {
@@ -278,17 +279,11 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                             _ => {}
                         }
                     }
-                    // println!(
-                    //     "found_thing:{},found_template:{}, in_ts:{}, rpbs:{:?}",
-                    //     found_thing, found_template, in_ts, remote_property_binding
-                    // );
+
                     if found_thing {
                         remote_property_binding.entity_type = "Thing".to_string();
                         remote_property_binding.entity_name = thing.name.clone();
-                        // println!(
-                        //     "found_thing:{},found_template:{}, in_ts:{}, rpbs:{:?},thing.property_binds:{}",
-                        //     found_thing, found_template, in_ts, remote_property_binding,thing.property_bindings.len()
-                        // );
+
                         thing.property_bindings.push(remote_property_binding);
                     } else if found_template {
                         remote_property_binding.entity_type = "ThingTemplate".to_string();
@@ -303,6 +298,7 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                     }
                 }
                 if e.name() == b"RemotePropertyBindings" {
+                    // println!("found remote property bindings");
                     is_remote_property_bindings = true;
                 }
                 if e.name() == b"Thing" {
@@ -498,6 +494,77 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                 }
             }
             Ok(Event::Empty(ref e)) => {
+                if is_remote_property_bindings && e.name() == b"RemotePropertyBinding" {
+                    let mut remote_property_binding = RemotePropertyBinding::default();
+
+                    for attr in e.attributes() {
+                        let attr = attr?;
+                        match attr.key {
+                            b"aspect.dataShape" => {
+                                remote_property_binding.data_shape =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.industrialDataType" => {
+                                remote_property_binding.industrial_data_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.scanRate" => {
+                                remote_property_binding.scan_rate =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.startType" => {
+                                remote_property_binding.start_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.tagAddress" => {
+                                remote_property_binding.tag_address =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"aspect.tagType" => {
+                                remote_property_binding.tag_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"foldType" => {
+                                remote_property_binding.fold_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"name" => {
+                                remote_property_binding.property_name =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"pushType" => {
+                                remote_property_binding.push_type =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"sourceName" => {
+                                remote_property_binding.source_name =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            b"timeout" => {
+                                remote_property_binding.timeout =
+                                    attr.unescape_and_decode_value(&reader)?;
+                            }
+                            _ => {}
+                        }
+                    }
+
+                    if found_thing {
+                        remote_property_binding.entity_type = "Thing".to_string();
+                        remote_property_binding.entity_name = thing.name.clone();
+
+                        thing.property_bindings.push(remote_property_binding);
+                    } else if found_template {
+                        remote_property_binding.entity_type = "ThingTemplate".to_string();
+                        remote_property_binding.entity_name = thing_template.name.clone();
+                        thing_template
+                            .property_bindings
+                            .push(remote_property_binding);
+                    } else if in_ts {
+                        remote_property_binding.entity_type = "ThingShape".to_string();
+                        remote_property_binding.entity_name = thing_shape.name.clone();
+                        thing_shape.property_bindings.push(remote_property_binding);
+                    }
+                }
                 if in_ts_sds_sd && e.name() == b"ResultType" {
                     let mut field_definition = si::FieldDefinition::default();
                     for attr in e.attributes() {
@@ -563,4 +630,52 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
         exported_services,
         exported_subscriptions,
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_remote_property_bindings() {
+        use quick_xml::events::Event;
+        use quick_xml::Reader;
+        let xml = r#"
+        <RemotePropertyBindings>
+        <RemotePropertyBinding aspect.dataShape="" aspect.industrialDataType="Short" aspect.scanRate="1000" aspect.startType="readEdgeValue" aspect.tagAddress="HNK.Bay6.ControllerMode" aspect.tagType="Static" foldType="NONE" name="ControllerMode" pushType="VALUE" sourceName="" timeout="0"/>
+        <RemotePropertyBinding aspect.dataShape="" aspect.industrialDataType="Byte" aspect.scanRate="1000" aspect.startType="readEdgeValue" aspect.tagAddress="HNK.Bay6.Feedrate Override" aspect.tagType="Static" foldType="NONE" name="FeedrateOverride" pushType="VALUE" sourceName="" timeout="0"/>
+        <RemotePropertyBinding aspect.dataShape="" aspect.industrialDataType="Short" aspect.scanRate="1000" aspect.startType="readEdgeValue" aspect.tagAddress="HNK.Bay6.MachineStatus" aspect.tagType="Static" foldType="NONE" name="LocalMachineSts" pushType="VALUE" sourceName="" timeout="0"/>
+        <RemotePropertyBinding aspect.dataShape="" aspect.industrialDataType="Float" aspect.scanRate="1000" aspect.startType="readEdgeValue" aspect.tagAddress="HNK.Bay6.PartCount" aspect.tagType="Static" foldType="NONE" name="LocalPartCount" pushType="VALUE" sourceName="" timeout="0"/>
+        <RemotePropertyBinding aspect.dataShape="" aspect.industrialDataType="Float" aspect.scanRate="1000" aspect.startType="readEdgeValue" aspect.tagAddress="HNK.Bay6.ProgramName" aspect.tagType="Static" foldType="NONE" name="ProgramName" pushType="VALUE" sourceName="" timeout="0"/>
+      </RemotePropertyBindings>
+        "#;
+        let mut reader = Reader::from_str(xml);
+        reader.trim_text(true);
+
+        let mut count = 0;
+        let mut buf = Vec::new();
+        loop {
+            match reader.read_event(&mut buf) {
+                Ok(Event::Start(ref e)) => {
+                    println!("{:?}", e);
+                    println!("name: {}", std::str::from_utf8(e.name()).unwrap());
+
+                    if e.name() == b"RemotePropertyBinding" {
+                        count += 1;
+                    }
+                }
+                Ok(Event::Empty(ref e)) => {
+                    println!("{:?}", e);
+                    println!("name: {}", std::str::from_utf8(e.name()).unwrap());
+                    if e.name() == b"RemotePropertyBinding" {
+                        count += 1;
+                    }
+                }
+                Ok(Event::Eof) => break,
+                Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
+                _ => (),
+            }
+            buf.clear();
+        }
+
+        assert_eq!(count, 5);
+    }
 }
