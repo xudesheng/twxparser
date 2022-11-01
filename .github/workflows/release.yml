@@ -75,6 +75,8 @@ jobs:
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
+          - target: aarch64-apple-darwin
+            os: macos-latest
           - target: x86_64-apple-darwin
             os: macos-latest
           - target: x86_64-pc-windows-msvc
@@ -89,7 +91,7 @@ jobs:
 
       - name: install-rust
         uses: dtolnay/rust-toolchain@stable
-        
+
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: twxparser
