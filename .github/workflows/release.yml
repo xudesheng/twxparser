@@ -52,9 +52,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: install-rust
-        uses: taiki-e/github-actions/install-rust@main
-        with:
-          toolchain: stable
+        uses: dtolnay/rust-toolchain@stable
+        
       - run: cargo package
       - name: create github release
         uses: taiki-e/create-gh-release-action@v1
