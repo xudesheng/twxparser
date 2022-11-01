@@ -2,7 +2,7 @@ use crate::si::*;
 use anyhow::Result;
 use std::{fs::File, io::BufWriter, io::Write, path::Path};
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Subscription {
     pub enabled: bool,
     pub event_name: String,
@@ -16,6 +16,11 @@ pub struct Subscription {
 
 impl Subscription {
     pub fn export_to_file(&self, path: &Path, leading_prefix: &str) -> Result<()> {
+        log::trace!(
+            "exporting subscription to file:{}, leading prefix:{}",
+            path.display(),
+            leading_prefix
+        );
         let file = File::create(path)?;
         let mut writer = BufWriter::new(file);
         writeln!(writer, "{}{:>20}:\t{}", leading_prefix, "name", self.name)?;

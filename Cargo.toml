@@ -1,6 +1,6 @@
 [package]
 name = "twxparser"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["Xu Desheng <xudesheng@gmail.com>"]
 license = "MIT"
@@ -10,10 +10,13 @@ description = "A parser to extract javascript or sql code from the Thingworx XML
 
 [dependencies]
 anyhow="1.0"
-clap = { version = "3.1", features = ["derive"] }
+clap = { version = "4", features = ["derive"] }
 quick-xml="0.22"
 csv = "1.1"
 serde = { version = "1.0", features = ["derive"] }
+log="0.4"
+env_logger = "0.9"
+log4rs = "1.1"
 
 [[bin]]
 name = "twxparser"

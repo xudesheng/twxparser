@@ -46,25 +46,25 @@ impl FromStr for ServiceHandler {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct FieldDefinition {
     pub name: String,
     pub base_type: String,
     pub ordinal: u32,
 }
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ServiceImplementation {
     pub name: String,
     pub service_type: ServiceHandler,
     pub code: String,
 }
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ServiceDefinition {
     pub name: String,
     pub parameters: Vec<FieldDefinition>,
     pub result: Option<FieldDefinition>,
 }
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Service {
     pub name: String,
     pub service_type: ServiceHandler,
@@ -75,6 +75,11 @@ pub struct Service {
 
 impl Service {
     pub fn export_to_file(&self, path: &Path, leading_prefix: &str) -> Result<()> {
+        log::trace!(
+            "exporting service to file:{}, leading prefix:{}",
+            path.display(),
+            leading_prefix
+        );
         let file = File::create(path)?;
         let mut writer = BufWriter::new(file);
 

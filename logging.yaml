@@ -1,0 +1,22 @@
+refresh_rate: 30 seconds
+
+appenders:
+  stdout:
+    kind: console
+
+  logfile:
+    kind: file
+    path: "target/twxparser.log"
+
+root:
+  level: error
+  appenders:
+    - stdout
+
+loggers:
+  twxparser::main:
+    level: debug
+    appenders:
+      - logfile
+    additive: false
+  

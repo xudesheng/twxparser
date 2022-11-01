@@ -32,13 +32,17 @@ struct Args {
     /// The output directory to write the generated files to
     #[clap(short, long, default_value = ".")]
     export_root: String,
+
+    #[clap(short, long)]
+    log_control_file: Option<String>,
 }
 
 fn main() -> Result<()> {
-    println!("{} {}, {}", PKG_NAME, VERSION, AUTHORS);
+    setup_log();
+    log::info!("{} {}, {}", PKG_NAME, VERSION, AUTHORS);
     let now = Instant::now();
     let args = Args::parse();
-    // println!("Processing file:{}", &args.source_path);
+    log::debug!("Processing file:{}", &args.source_path);
     let filenames = collect_filenames(&args.source_path)?;
     let mut sum_thing_count = 0;
     let mut sum_template_count = 0;
@@ -54,7 +58,7 @@ fn main() -> Result<()> {
     for filename in filenames.iter() {
         let file = fs::File::open(filename)?;
         let file = BufReader::new(file);
-        // println!("processing file: {:?}", filename);
+        log::debug!("processing file: {:?}", filename);
         let (
             thing_count,
             thing_template_count,
@@ -67,8 +71,8 @@ fn main() -> Result<()> {
         ) = match parse(file, &args.export_root) {
             Ok(result) => result,
             Err(err) => {
-                println!("Error processing file: {:?}", filename);
-                println!("{}", err);
+                log::error!("Error processing file: {:?}", filename);
+                log::error!("{}", err);
                 continue;
             }
         };
@@ -82,19 +86,24 @@ fn main() -> Result<()> {
         sum_exported_subscriptions += exported_subscriptions;
     }
 
-    println!(
+    log::info!(
         "Total things:{}, thing templates:{}, thing shapes:{}. ",
-        sum_thing_count, sum_template_count, sum_shape_count
+        sum_thing_count,
+        sum_template_count,
+        sum_shape_count
     );
-    println!(
+    log::info!(
         "Exported things:{}, thing templates:{}, thing shapes:{}.",
-        sum_exported_things, sum_exported_templates, sum_exported_shapes
+        sum_exported_things,
+        sum_exported_templates,
+        sum_exported_shapes
     );
-    println!(
+    log::info!(
         "Exported services:{}, subscriptions:{}.",
-        sum_exported_services, sum_exported_subscriptions
+        sum_exported_services,
+        sum_exported_subscriptions
     );
-    println!(
+    log::info!(
         "Successfully exported to folder: {} in {}ms.",
         &args.export_root,
         now.elapsed().as_millis()
@@ -108,10 +117,10 @@ fn collect_filenames(source: &str) -> Result<Vec<PathBuf>> {
     let mut filenames = Vec::new();
 
     if source_path.exists() && source_path.is_file() {
-        println!("{} is a file...", source);
+        log::info!("{} is a file...", source);
         filenames.push(source_path.to_path_buf());
     } else if source_path.exists() && source_path.is_dir() {
-        println!("{} is a directory...", source);
+        log::info!("{} is a directory...", source);
         let mut found_things = false;
         let mut found_thing_templates = false;
         let mut found_thing_shapes = false;
@@ -160,4 +169,22 @@ fn collect_filenames(source: &str) -> Result<Vec<PathBuf>> {
         return Err(anyhow!("{} does not exist", source));
     }
     Ok(filenames)
+}
+
+pub fn setup_log() {
+    let opts = Args::parse();
+    match opts.log_control_file {
+        Some(ref file) => {
+            log::debug!("Log control file: {}", file);
+            log4rs::init_file(file, Default::default()).expect("Failed to initialize log4rs");
+        }
+        None => {
+            log::debug!("No log control file");
+            env_logger::Builder::new()
+                .parse_filters(
+                    &std::env::var("THINGWORX_EXPORTER_LOG").unwrap_or_else(|_| "info".to_string()),
+                )
+                .init();
+        }
+    }
 }

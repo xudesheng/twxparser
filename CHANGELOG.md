@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.2.2] v0.2.2 (2022-11-01)
+- fixed a bug which will remove some folders when there is a shape in the mashup.
+- add log control support.
+
 ## [Unreleased]
 ## [v0.2.1] v0.2.1 (2022-04-07)
 

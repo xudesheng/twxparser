@@ -2,7 +2,7 @@ use crate::si::*;
 use crate::sub::*;
 use crate::{bindings::RemotePropertyBinding, servicable::Servicable};
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Thing {
     pub name: String,
     pub template: String,

@@ -43,11 +43,15 @@ pub trait Servicable {
     fn get_subscriptions(&self) -> &Vec<Subscription>;
 
     fn clean_folder(&self, root: &str) -> Result<()> {
+        if self.get_name().is_empty() {
+            return Ok(());
+        }
         let mut path = PathBuf::from(root);
         path.push(self.get_charactor_str());
         path.push(&self.get_name());
 
         if path.exists() {
+            log::trace!("cleaning folder:{}", path.display());
             std::fs::remove_dir_all(&path)?;
         }
         Ok(())
@@ -90,9 +94,11 @@ pub trait Servicable {
         self.export_remote_property_bindings(root)?;
 
         if !self.need_export() {
+            log::trace!("{} don't need export", self.get_name());
             self.clean_folder(root)?;
             return Ok((0, 0, 0));
         }
+        log::trace!("{} would need export", self.get_name());
         let mut service_count = 0;
         let mut subscription_count = 0;
         let path = self.build_entity_folder(root)?;
@@ -104,7 +110,11 @@ pub trait Servicable {
                 std::fs::remove_dir_all(&path)?;
             }
             std::fs::create_dir_all(&path)?;
-
+            log::trace!(
+                "{} export subscriptions to:{}",
+                self.get_name(),
+                path.display()
+            );
             for subscription in self.get_subscriptions() {
                 if subscription.service_type == ServiceHandler::Reflection
                     || subscription.service_type == ServiceHandler::Route
@@ -136,8 +146,20 @@ pub trait Servicable {
                         "// "
                     }
                 };
-                subscription.export_to_file(&service_path, leading_prefix)?;
-                subscription_count += 1;
+                match subscription.export_to_file(&service_path, leading_prefix) {
+                    Ok(_) => {
+                        subscription_count += 1;
+                    }
+                    Err(e) => {
+                        log::error!(
+                            "export {} to path:{} failed:{}",
+                            subscription.name,
+                            service_path.display(),
+                            e
+                        );
+                    }
+                }
+                // subscription_count += 1;
             }
         }
         if self.get_valid_service_count() > 0 {
@@ -147,7 +169,7 @@ pub trait Servicable {
                 std::fs::remove_dir_all(&path)?;
             }
             std::fs::create_dir_all(&path)?;
-
+            log::trace!("{} export services to:{}", self.get_name(), path.display());
             for service in self.get_services() {
                 if service.service_type == ServiceHandler::Reflection
                     || service.service_type == ServiceHandler::Route
@@ -178,8 +200,20 @@ pub trait Servicable {
                         "// "
                     }
                 };
-                service.export_to_file(&service_path, leading_prefix)?;
-                service_count += 1;
+                match service.export_to_file(&service_path, leading_prefix) {
+                    Ok(_) => {
+                        service_count += 1;
+                    }
+                    Err(e) => {
+                        log::error!(
+                            "export service {} to path:{} failed:{}",
+                            service.name,
+                            service_path.display(),
+                            e
+                        );
+                    }
+                }
+                // service_count += 1;
             }
         }
 

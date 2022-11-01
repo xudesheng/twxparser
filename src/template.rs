@@ -3,7 +3,7 @@ use crate::servicable::Servicable;
 use crate::si::*;
 use crate::sub::*;
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ThingTemplate {
     pub name: String,
     pub template: String,
