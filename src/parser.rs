@@ -444,7 +444,7 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                         }
                     }
                     if !(found_thing || found_template) {
-                        log::info!("found shape:{}, exporting", thing_shape.name);
+                        log::trace!("found shape:{}, exporting", thing_shape.name);
                         thing_shape_count += 1;
                         let (entity_count, svc_count, sub_count) =
                             match thing_shape.export_services(export_root) {
