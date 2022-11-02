@@ -8,7 +8,7 @@ use std::{fmt, path::Path};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ServiceHandler {
-    Scrit,
+    Script,
     SQLQuery,
     SQLCommand,
     Route,
@@ -17,13 +17,13 @@ pub enum ServiceHandler {
 
 impl Default for ServiceHandler {
     fn default() -> Self {
-        ServiceHandler::Scrit
+        ServiceHandler::Script
     }
 }
 impl fmt::Display for ServiceHandler {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            ServiceHandler::Scrit => write!(f, "Scrit"),
+            ServiceHandler::Script => write!(f, "Script"),
             ServiceHandler::SQLQuery => write!(f, "SQLQuery"),
             ServiceHandler::SQLCommand => write!(f, "SQLCommand"),
             ServiceHandler::Route => write!(f, "Route"),
@@ -36,7 +36,7 @@ impl FromStr for ServiceHandler {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Script" => Ok(ServiceHandler::Scrit),
+            "Script" => Ok(ServiceHandler::Script),
             "SQLQuery" => Ok(ServiceHandler::SQLQuery),
             "SQLCommand" => Ok(ServiceHandler::SQLCommand),
             "Route" => Ok(ServiceHandler::Route),

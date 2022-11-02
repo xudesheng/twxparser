@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.3] v0.2.2 (2022-11-01)
+- fix the typo "script"
+- known issue: if the xml has been "prettified" (i.e. indented), the script will have redundant indents at the beginning of each line
+
+
 ## [v0.2.2] v0.2.2 (2022-11-01)
 - fixed a bug which will remove some folders when there is a shape in the mashup.
 - add log control support.

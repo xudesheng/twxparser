@@ -125,7 +125,7 @@ pub trait Servicable {
                 let mut service_path = path.clone();
                 service_path.push(&subscription.name.replace(':', "_"));
                 let leading_prefix = match subscription.service_type {
-                    ServiceHandler::Scrit => {
+                    ServiceHandler::Script => {
                         service_path.set_extension("js");
                         "// "
                     }
@@ -179,7 +179,7 @@ pub trait Servicable {
                 let mut service_path = path.clone();
                 service_path.push(&service.name.replace(':', "_"));
                 let leading_prefix = match service.service_type {
-                    ServiceHandler::Scrit => {
+                    ServiceHandler::Script => {
                         service_path.set_extension("js");
                         "// "
                     }
