@@ -74,7 +74,12 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn export_to_file(&self, path: &Path, leading_prefix: &str) -> Result<()> {
+    pub fn export_to_file(
+        &self,
+        path: &Path,
+        leading_prefix: &str,
+        should_clean: bool,
+    ) -> Result<()> {
         log::trace!(
             "exporting service to file:{}, leading prefix:{}",
             path.display(),
@@ -104,8 +109,12 @@ impl Service {
             )?;
         }
 
-        // writeln!(writer, "{}", &self.code)?;
-        writeln!(writer, "{}", clean_prettified_code(&self.code))?;
+        //
+        if should_clean {
+            writeln!(writer, "{}", clean_prettified_code(&self.code))?;
+        } else {
+            writeln!(writer, "{}", &self.code)?;
+        }
         if let Some(ref result) = self.result {
             write!(
                 writer,
@@ -118,14 +127,7 @@ impl Service {
     }
 }
 
-fn clean_prettified_code(code: &str) -> String {
-    let should_clean = match std::env::var("CLEAN_PRETTIFIED_CODE") {
-        Ok(content) => content.to_lowercase() != "false",
-        _ => true,
-    };
-    if !should_clean {
-        return code.to_string();
-    }
+pub fn clean_prettified_code(code: &str) -> String {
     let leading_counter = probe_leading_letter_count(code);
     if leading_counter == 0 {
         return code.to_string();

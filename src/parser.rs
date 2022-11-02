@@ -34,7 +34,11 @@ type ParserCounters = (
     u32, // exported services
     u32, // exported subscriptions
 );
-pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounters> {
+pub fn parse(
+    reader: BufReader<File>,
+    export_root: &str,
+    should_clean: bool,
+) -> Result<ParserCounters> {
     let mut reader = Reader::from_reader(reader);
 
     let mut buf = Vec::new();
@@ -447,7 +451,7 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                         log::trace!("found shape:{}, exporting", thing_shape.name);
                         thing_shape_count += 1;
                         let (entity_count, svc_count, sub_count) =
-                            match thing_shape.export_services(export_root) {
+                            match thing_shape.export_services(export_root, should_clean) {
                                 Ok(v) => v,
                                 Err(e) => {
                                     println!(
@@ -469,7 +473,7 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                 if e.name() == b"Thing" {
                     found_thing = false;
                     let (entity_count, svc_count, sub_count) =
-                        match thing.export_services(export_root) {
+                        match thing.export_services(export_root, should_clean) {
                             Ok(v) => v,
                             Err(e) => {
                                 println!("export_services error:{},thing.name:{}", e, thing.name);
@@ -486,7 +490,7 @@ pub fn parse(reader: BufReader<File>, export_root: &str) -> Result<ParserCounter
                 if e.name() == b"ThingTemplate" {
                     found_template = false;
                     let (entity_count, svc_count, sub_count) =
-                        match thing_template.export_services(export_root) {
+                        match thing_template.export_services(export_root, should_clean) {
                             Ok(v) => v,
                             Err(e) => {
                                 println!(

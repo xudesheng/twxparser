@@ -35,13 +35,18 @@ struct Args {
 
     #[clap(short, long)]
     log_control_file: Option<String>,
+
+    #[clap(short, long)]
+    clean_prettifed_code: bool,
 }
 
 fn main() -> Result<()> {
     setup_log();
-    log::info!("{} {}, {}", PKG_NAME, VERSION, AUTHORS);
+
     let now = Instant::now();
     let args = Args::parse();
+    log::info!("{} {}, {}", PKG_NAME, VERSION, AUTHORS);
+    log::info!("{:?}", args);
     log::debug!("Processing file:{}", &args.source_path);
     let filenames = collect_filenames(&args.source_path)?;
     let mut sum_thing_count = 0;
@@ -68,7 +73,7 @@ fn main() -> Result<()> {
             exported_thing_shapes,
             exported_services,
             exported_subscriptions,
-        ) = match parse(file, &args.export_root) {
+        ) = match parse(file, &args.export_root, args.clean_prettifed_code) {
             Ok(result) => result,
             Err(err) => {
                 log::error!("Error processing file: {:?}", filename);

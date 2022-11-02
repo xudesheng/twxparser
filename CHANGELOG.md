@@ -1,8 +1,7 @@
 # Changelog
 
 ## [v0.2.4] v0.2.4 (2022-11-01)
-- workaround to get rid of the annoying leading space caused by the xml prettify function. (unknown in which step it happens)
-- if you want to turn it off, please set `CLEAN_PRETTIFIED_CODE` to `false`
+- workaround to get rid of the annoying leading space caused by the xml prettify function. (unknown in which step it happens). It can be controlled via `clean_prettifed_code` in the command line. see `--help` for more details.
 
 ## [v0.2.3] v0.2.2 (2022-11-01)
 - fix the typo "script"

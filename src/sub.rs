@@ -15,7 +15,12 @@ pub struct Subscription {
 }
 
 impl Subscription {
-    pub fn export_to_file(&self, path: &Path, leading_prefix: &str) -> Result<()> {
+    pub fn export_to_file(
+        &self,
+        path: &Path,
+        leading_prefix: &str,
+        should_clean: bool,
+    ) -> Result<()> {
         log::trace!(
             "exporting subscription to file:{}, leading prefix:{}",
             path.display(),
@@ -54,7 +59,12 @@ impl Subscription {
             "{}{:>20}:\t{}",
             leading_prefix, "service_type", self.service_type
         )?;
-        write!(writer, "{}", &self.code)?;
+        if should_clean {
+            write!(writer, "{}", clean_prettified_code(&self.code))?;
+        } else {
+            write!(writer, "{}", &self.code)?;
+        }
+        // write!(writer, "{}", &self.code)?;
         Ok(())
     }
 }

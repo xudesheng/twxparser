@@ -90,7 +90,7 @@ pub trait Servicable {
         Ok(())
     }
     // entity, services, subscriptions exported.
-    fn export_services(&self, root: &str) -> Result<(u32, u32, u32)> {
+    fn export_services(&self, root: &str, should_clean: bool) -> Result<(u32, u32, u32)> {
         self.export_remote_property_bindings(root)?;
 
         if !self.need_export() {
@@ -146,7 +146,7 @@ pub trait Servicable {
                         "// "
                     }
                 };
-                match subscription.export_to_file(&service_path, leading_prefix) {
+                match subscription.export_to_file(&service_path, leading_prefix, should_clean) {
                     Ok(_) => {
                         subscription_count += 1;
                     }
@@ -200,7 +200,7 @@ pub trait Servicable {
                         "// "
                     }
                 };
-                match service.export_to_file(&service_path, leading_prefix) {
+                match service.export_to_file(&service_path, leading_prefix, should_clean) {
                     Ok(_) => {
                         service_count += 1;
                     }
