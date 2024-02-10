@@ -26,17 +26,17 @@ It can also export all remote property bindings info, aiming for developer to va
     1. When you exported to a folder:
 
     ```
-    twxparser -s <point to the folder you exported to> -e ./export_rootfolder/
+    twxparser -9 <point to the folder you exported to> -o ./export_rootfolder/
     ```
 
-    `-s` or `--source_path` indicates the file or folder you want to extract the scripts from.
+    `-i` or `--input` indicates the file or folder you want to extract the scripts from.
 
-    `-e` or `--export_root` indicates in which folder you want to export the scripts to.
+    `-o` or `--output` indicates in which folder you want to export the scripts to.
 
     2. When you exported as a whole XML file:
 
        ```
-       twxparser -s <your AllEntities.xml> -e ./export_rootfolder/
+       twxparser -i <your AllEntities.xml> -e ./export_rootfolder/
        ```
 
        
@@ -46,15 +46,6 @@ It can also export all remote property bindings info, aiming for developer to va
 The exported content includes 3 folders and 1 csv file:
 
 <img src="docs/image-20220328230250512.png" alt="image-20220328230250512" style="zoom:50%;" />
-
-## Known Issue:
-
-On windows, this tool will report some file can't be processed, the error message is:
-
-```
-Error processing file: "C:\\Users\\dxu\\PROD_SourceControl_Mar 22,2022\\Things\\BSLRG1003.xml"
-The filename, directory name, or volume label syntax is incorrect. (os error 123)
-```
 
 
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.1.0] v0.1.0 (2023-02-09)
+- Happy Chinese New Year
+- Deprecated all original code
+- Step by Step to rebuild a new tool set from v0.1.0
+
 ## [v0.2.4] v0.2.4 (2022-11-01)
 - workaround to get rid of the annoying leading space caused by the xml prettify function. (unknown in which step it happens). It can be controlled via `clean_prettifed_code` in the command line. see `--help` for more details.
 
