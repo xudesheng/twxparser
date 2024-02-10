@@ -4,7 +4,7 @@ This is a small tool to extract the javascript and sql from the Thingworx XML fi
 
 This tool will simply extract the javascript and/or sql script from the `Services` and `Subscription` tabs of all `Things`, `ThingTemplates` and `ThingShape`. 
 
-It can also export all remote property bindings info, aiming for developer to validate the binding tag and `start type`.
+Please download it from the latest release: https://github.com/xudesheng/twxparser/releases/tag/twx-parser-v0.1.0 
 
 ## How to use
 
@@ -26,7 +26,7 @@ It can also export all remote property bindings info, aiming for developer to va
     1. When you exported to a folder:
 
     ```
-    twxparser -9 <point to the folder you exported to> -o ./export_rootfolder/
+    twxparser -i <point to the folder you exported to> -o ./export_rootfolder/
     ```
 
     `-i` or `--input` indicates the file or folder you want to extract the scripts from.
@@ -36,7 +36,7 @@ It can also export all remote property bindings info, aiming for developer to va
     2. When you exported as a whole XML file:
 
        ```
-       twxparser -i <your AllEntities.xml> -e ./export_rootfolder/
+       twxparser -i <your AllEntities.xml> -o ./export_rootfolder/
        ```
 
        
